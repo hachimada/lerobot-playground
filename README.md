@@ -30,7 +30,7 @@ If you want to update to a specific commit, check out that commit inside `lerobo
 2. Install the lerobot submodule in editable mode so local changes under `lerobot/` are instantly available:
 
    ```bash
-   uv pip install -e ./lerobot
+   uv pip install -e "./lerobot[all]"
    ```
 
 3. (Optional) install the playground helpers too:
@@ -38,3 +38,109 @@ If you want to update to a specific commit, check out that commit inside `lerobo
    ```bash
    uv pip install -e .
    ```
+
+## setup motor
+
+```bash
+lerobot-setup-motors \
+    --teleop.type=so101_leader \
+    --teleop.port==/dev/ttyACM1
+
+lerobot-setup-motors \
+    --robot.type=so101_follower \
+    --robot.port=/dev/ttyACM1
+```
+
+## calibrate
+
+```bash
+lerobot-calibrate \
+--teleop.type=so101_leader \
+--teleop.port=/dev/ttyACM0 \
+--teleop.id=so101_leader_arm
+
+lerobot-calibrate \
+--robot.type=so101_follower \
+--robot.port=/dev/ttyACM1 \
+--robot.id=so101_follower_arm
+```
+
+## teleop
+
+### using realsense
+
+```bash
+lerobot-teleoperate \
+--robot.type=so101_follower \
+--robot.port=/dev/tty.ACM1 \
+--robot.id=so101_follower_arm \
+--teleop.type=so101_leader \
+--teleop.port=/dev/tty.ACM0 \
+--teleop.id=so101_leader_arm \
+--display_data=true \
+--robot.cameras="{ front: {type: intelrealsense, serial_number_or_name: 829212070069, width: 640, height: 480, fps: 30}}" 
+```
+
+### using web-cam
+
+```bash
+lerobot-teleoperate \
+--robot.type=so101_follower \
+--robot.port=/dev/ttyACM1 \
+--robot.id=so101_follower_arm \
+--teleop.type=so101_leader \
+--teleop.port=/dev/ttyACM0 \
+--teleop.id=so101_leader_arm \
+--display_data=true \
+--robot.cameras="{ front: {type: opencv, index_or_path: 1, width: 640, height: 480, fps: 30}}"
+```
+
+## record dataset
+
+```bash
+lerobot-record \
+--robot.type=so101_follower \
+--robot.port=/dev/ttyACM1 \
+--robot.id=so101_follower_arm \
+--teleop.type=so101_leader \
+--teleop.port=/dev/ttyACM0 \
+--teleop.id=so101_leader_arm \
+--display_data=true \
+--robot.cameras="{ front: {type: opencv, index_or_path: 1, width: 640, height: 480, fps: 30}}" \
+--dataset.num_episodes=50 \
+--dataset.single_task="pickup red object and place it to black box" \
+--dataset.episode_time_s=15 \
+--dataset.reset_time_s=10 \
+--dataset.repo_id=${HF_USER}/so101_pick_place_red_1 \
+--dataset.push_to_hub=false # default is true
+--play_sounds=false # 音声ガイダンスの有無
+--resume=true # 既存データセットへの追記モード
+```
+
+
+## train
+
+```bash
+lerobot-train \
+--dataset.repo_id=${HF_USER}/so101_pick_place_red_1 \
+--policy.type=act \
+--output_dir=outputs/train/act_so101_test \
+--job_name=act_so101_test \
+--policy.device=cuda \
+--wandb.enable=false \
+--policy.repo_id=${HF_USER}/act_so101_pick_place_red_1
+```
+
+## inference
+
+```bash
+lerobot-record \
+--robot.type=so101_follower \
+--robot.port=/dev/ttyACM1 \
+--robot.id=so101_follower_arm \
+--robot.cameras="{ front: {type: opencv, index_or_path: 1, width: 640, height: 480, fps: 30}}" \
+--display_data=true \
+--dataset.repo_id=${HF_USER}/eval_record-test3 \
+--dataset.single_task="pick red usb and place it to black box" \
+--policy.path=${HF_USER}/my_policy
+```
