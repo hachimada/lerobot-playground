@@ -1,2 +1,7 @@
 .venv/
 outputs/
+datasets
+**dataset**/
+*.zip
+episode_videos/
+_*

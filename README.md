@@ -144,3 +144,28 @@ lerobot-record \
 --dataset.single_task="pick red usb and place it to black box" \
 --policy.path=${HF_USER}/my_policy
 ```
+
+## visualize local dataset
+
+```bash
+uv run lerobot-dataset-viz \
+--repo-id dummy  \
+--root path/to/your/local/dataset \
+--episode-index 4 \
+--video-backend pyav
+```
+
+- --root: データセットのルートディレクトリへの完全なパスを指定します。（例: lerobot_dataset_15hz）
+- --repo-id: データセットの識別子として使われます。ログ出力や、将来的にHubにプッシュする際などに使われますが、ローカルのパスを解決するためには使われません。
+
+## update dataset to new Lerobot format
+
+```bash
+python src/lerobot/datasets/v30/convert_dataset_v21_to_v30.py \
+    --repo-id=lerobot/pusht \
+    --root=/path/to/local/dataset/directory
+    --push-to-hub=false
+```
+
+- スクリプトは、--rootで指定されたパスにデータセットが存在するかどうかを確認します。
+- もしローカルにデータセットが存在しない場合、--repo-idで指定されたHugging Face Hubのリポジトリから、v2.1バージョンのデータセットをダウンロードします。
